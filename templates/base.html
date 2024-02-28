@@ -4,19 +4,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title | default("Stock Delivery System")}}</title>
+    <title>{{ title | default("Stock Delivery System") }}</title>
     <link rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}" />
   </head>
 
   <body>
     <header>
-      <h1>Stock Management System</h1>
+      <h1>{{ title | default("Stock Delivery System") }}</h1>
     </header>
 
     <nav>
       <a href="{{ url_for('homepage') }}">Home</a>
-      {% if session["user_id"] is not none %}
+      {% if g.user %}
       <a href="{{ url_for('log_out') }}">Log Out</a>
       {% else %}
       <a href="{{ url_for('register') }}">Register</a>
@@ -24,7 +24,9 @@
       {% endif %}
     </nav>
 
-    {% block main_content %} {% endblock %}
+    <main>
+      {% block main_content %} {% endblock %}
+    </main>
   </body>
 
 </html>

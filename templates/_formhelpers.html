@@ -1,0 +1,12 @@
+/* Code gotten from WTForms Documentation:
+https://flask.palletsprojects.com/en/3.0.x/patterns/wtforms/#forms-in-templates */
+
+{% macro render_field(field) %}
+
+{{ field.label }}
+{{ field(**kwargs) | safe }}
+{% for error in field.errors %}
+{{ error }}
+{% endfor %}
+
+{% endmacro %}

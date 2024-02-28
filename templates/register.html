@@ -2,28 +2,17 @@
 
 {% block main_content %}
 
+{% from "_formhelpers.html" import render_field %}
 <form action method="POST" novalidate>
   {{ form.hidden_tag() }}
 
-  {{ form.user_id.label }}
-  {{ form.user_id() }}
-  {% for error in form.user_id.errors %}
-  {{ error }}
-  {% endfor %}
+  {{ render_field(form.user_id) }}
   <br />
 
-  {{ form.password.label }}
-  {{ form.password() }}
-  {% for error in form.password.errors %}
-  {{ error }}
-  {% endfor %}
+  {{ render_field(form.password) }}
   <br />
 
-  {{ form.password2.label }}
-  {{ form.password2() }}
-  {% for error in form.password2.errors %}
-  {{ error }}
-  {% endfor %}
+  {{ render_field(form.password2) }}
   <br />
 
   {{ form.submit() }}
