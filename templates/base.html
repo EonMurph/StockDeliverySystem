@@ -7,20 +7,19 @@
     <title>{{ title | default("Stock Delivery System") }}</title>
     <link rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}" />
+    {% block css %} {% endblock %}
   </head>
 
   <body>
     <header>
-      <h1>{{ title | default("Stock Delivery System") }}</h1>
+      <h1>Stock Management System</h1>
+      {% block page_title %} {% endblock %}
     </header>
 
     <nav>
       <a href="{{ url_for('homepage') }}">Home</a>
       {% if g.user %}
       <a href="{{ url_for('log_out') }}">Log Out</a>
-      {% else %}
-      <a href="{{ url_for('register') }}">Register</a>
-      <a href="{{ url_for('log_in') }}">Log In</a>
       {% endif %}
     </nav>
 

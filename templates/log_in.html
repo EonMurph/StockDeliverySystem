@@ -1,21 +1,25 @@
 {% extends 'base.html' %}
 
+{% block page_title%}
+<h2>Log In</h2>
+{% endblock %}
+
 {% block main_content %}
 
-<form action="" method="POST" novalidate>
+<form action method="POST" novalidate>
   {{ form.hidden_tag() }}
-  
+
   {% from "_formhelpers.html" import render_field %}
-  
+
   {{ render_field(form.user_id) }}
   <br />
 
   {{ render_field(form.password) }}
   <br />
-  
+
   {{ form.submit() }}
   <br />
-  
+
   {{ incorrect_error }}
 </form>
 

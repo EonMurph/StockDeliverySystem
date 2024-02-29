@@ -1,5 +1,20 @@
+<!-- Login page inspiration from OpenAI's ChatGPT login page -->
 {% extends "base.html" %}
 
-{% block main_content %}
+{% block css%}
+<link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}" />
+{% endblock %}
 
+{% block main_content %}
+<section id="tips">
+  {% block tip %}
+  {% endblock %}
+</section>
+<section id="login">
+  <h3>Welcome</h3>
+  <div>
+    <a href="{{ url_for('register') }}">Register</a>
+    <a href="{{ url_for('log_in') }}">Log In</a>
+  </div>
+</section>
 {% endblock %}
