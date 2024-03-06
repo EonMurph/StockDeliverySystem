@@ -6,6 +6,11 @@
 
 {% block main_content %}
 
+{% if g.restricted %}
+<p>The area you tried to access was blocked.</p>
+<p>You must have {{ g.restrictions }} privileges.</p>
+{% endif %}
+
 <form action method="POST" novalidate>
   {{ form.hidden_tag() }}
 
@@ -13,14 +18,11 @@
 
   {{ render_field(form.user_id) }}
   <br />
-
+  
   {{ render_field(form.password) }}
   <br />
 
   {{ form.submit() }}
-  <br />
-
-  {{ incorrect_error }}
 </form>
 
 {% endblock %}

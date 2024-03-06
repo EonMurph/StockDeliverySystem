@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block page_title %}<h2>Raise Permissions</h2>{% endblock %}
+
+{% block main_content %}
+
+{% from "_formhelpers.html" import render_field %}
+
+<form action novalidate method="POST">
+  {{ form.hidden_tag() }}
+
+  {{ render_field(form.user_ids) }}
+  <br />
+
+  {{ form.admin_submit() }}
+  {{ form.manager_submit() }}
+</form>
+
+<p>{{ message }}</p>
+
+{% endblock %}
