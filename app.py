@@ -198,3 +198,10 @@ def raise_permissions():
         message = f"User {user_id} was successfully made {permission}."
 
     return render_template("raise_permissions.html", form=form, message=message)
+
+
+# TODO route for adding stores
+# TODO route for adding product
+# possibly do in one route
+
+# TODO route for soonest delivery
