@@ -56,7 +56,7 @@ def restricted(view, restriction):
             session["restrictions"] = restriction
             session["restricted"] = True
 
-            return redirect(url_for("log_in", next=request.url))
+            return redirect(url_for("homepage", next=request.url))
         return view(*args, **kwargs)
     return wrapped_view
 
@@ -66,10 +66,14 @@ admin_required = partial(restricted, restriction="admin")
 manager_required = partial(restricted, restriction="manager")
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def homepage():
     if g.user:
         return render_template("homepage.html")
+
+    reg_form = RegistrationForm()
+    login_form = LogInForm()
+
     tips = list(glob("./templates/tips/*.html"))
     for i in range(len(tips)):
         parent = path.basename(path.dirname(tips[i]))
@@ -79,81 +83,80 @@ def homepage():
     # TODO populate tips and remove next line
     index = choice(tips) if tips else "index.html"
 
-    return render_template(index)
+    if reg_form.validate_on_submit():
+        reg_form = register(reg_form)
+        if session["user_id"]:
+            return redirect(url_for("homepage"))
+    if login_form.validate_on_submit():
+        login_form = log_in(login_form)
+        if session["user_id"]:
+            next_page = request.args.get("next") or url_for("homepage")
+            return redirect(next_page)
+
+    return render_template(index, reg_form=reg_form, login_form=login_form)
 
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    form = RegistrationForm(request.form)
+def register(form):
+    user_id = form.user_id.data
+    password = form.password.data
+    password2 = form.password2.data
 
-    if form.validate_on_submit():
-        user_id = form.user_id.data
-        password = form.password.data
-        password2 = form.password2.data
-
-        db = get_db()
+    db = get_db()
+    query = """
+            SELECT *
+            FROM users
+            WHERE user_id = ?;
+            """
+    if db.execute(query, (user_id,)).fetchone():
+        form.user_id.errors.append("Username already taken.")
+    else:
         query = """
-                SELECT *
-                FROM users
-                WHERE user_id = ?;
+                INSERT INTO users (user_id, password)
+                VALUES (?, ?)
                 """
-        if db.execute(query, (user_id,)).fetchone():
-            form.user_id.errors.append("Username already taken.")
-        else:
+        db.execute(query, (user_id, generate_password_hash(password)))
+        db.commit()
+
+        session["user_id"] = user_id
+
+    return form
+
+
+def log_in(form):
+    user_id = form.user_id.data
+    password = form.password.data
+
+    db = get_db()
+    query = """
+            SELECT user_id, password
+            FROM users
+            WHERE user_id = ?;
+            """
+    if user_data := db.execute(query, (user_id,)).fetchone():
+        if check_password_hash(user_data["password"], password):
+
+            session.clear()
+
             query = """
-                    INSERT INTO users (user_id, password)
-                    VALUES (?, ?)
+                    SELECT *
+                    FROM users
+                    WHERE user_id = ?;
                     """
-            db.execute(query, (user_id, generate_password_hash(password)))
-            db.commit()
+            user_data = db.execute(query, (user_id,)).fetchone()
+
+            if user_data["admin"] == 1:
+                session["admin"] = True
 
             session["user_id"] = user_id
-            return redirect(url_for("homepage"))
-
-    return render_template("register.html", form=form)
-
-
-@app.route("/log_in", methods=["GET", "POST"])
-def log_in():
-    form = LogInForm()
-    db = get_db()
-
-    if form.validate_on_submit():
-        user_id = form.user_id.data
-        password = form.password.data
-
-        query = """
-                SELECT user_id, password
-                FROM users
-                WHERE user_id = ?;
-                """
-        if user_data := db.execute(query, (user_id,)).fetchone():
-            if check_password_hash(user_data["password"], password):
-
-                session.clear()
-
-                query = """
-                        SELECT *
-                        FROM users
-                        WHERE user_id = ?;
-                        """
-                user_data = db.execute(query, (user_id,)).fetchone()
-
-                if user_data["admin"] == 1:
-                    session["admin"] = True
-
-                session["user_id"] = user_id
-                next_page = request.args.get("next") or url_for("homepage")
-
-                return redirect(next_page)
-
-            else:
-                form.password.errors.append("Incorrect password.")
 
         else:
-            form.user_id.errors.append("Incorrect user id.")
+            form.password.errors.append("Incorrect password.")
 
-    return render_template("log_in.html", form=form)
+    else:
+        form.user_id.errors.append("Incorrect user id.")
+
+
+    return form
 
 
 @app.route("/log_out")
