@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS products
 (
     product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_name TEXT
+    product_name TEXT,
+    product_image TEXT
 );
 
 -- DROP TABLE IF EXISTS stores;
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS product_in_stores
     product_id INTERGER
     order_point INTEGER DEFAULT 10,
     store_id INTEGER,
+    amount INTEGER,
     FOREIGN KEY (product_id) REFERENCES products(product_id)
     FOREIGN KEY (store_id) REFERENCES stores(store_id)
 );
