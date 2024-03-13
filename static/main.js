@@ -5,11 +5,11 @@ document.addEventListener("DOMContentLoaded", ()=> {
     let login_form = document.getElementById("login_form");
 
     register_button.addEventListener('click', ()=> {
-        register_form.style.display = "block";
+        register_form.style.display = "grid";
         login_form.style.display = "none";
     }, false)
     login_button.addEventListener('click', ()=> {
         register_form.style.display = "none";
-        login_form.style.display = "block";
+        login_form.style.display = "grid";
     }, false)
 }, false)

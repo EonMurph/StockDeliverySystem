@@ -8,3 +8,30 @@ nav {
   border-bottom: 2px black solid;
   padding-bottom: 10px;
 }
+
+main:has(form) {
+  display: flex;
+  justify-content: center;
+
+  form {
+    border: solid 2px black;
+    padding: 10px;
+    width: 40vh;
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 0;
+
+    input[type="submit"] {
+      cursor: pointer;
+      grid-column: 2;
+    }
+    label {
+      grid-column: 1;
+    }
+    input {
+      grid-column: 2;
+      width: 8em;
+      box-sizing: border-box;
+    }
+  }
+}
