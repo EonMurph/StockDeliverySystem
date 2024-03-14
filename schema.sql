@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS products
 CREATE TABLE IF NOT EXISTS stores
 (
     store_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    store_name TEXT,
     manager_id INTEGER NOT NULL,
     FOREIGN KEY (manager_id) REFERENCES users(user_id)
 );
