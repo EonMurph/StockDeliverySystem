@@ -217,12 +217,7 @@ def raise_permissions():
         store_id = form.store_id.data
         permission = "admin" if form.admin_submit.data else "manager"
 
-        query = f"""
-                UPDATE users
-                SET {permission} = 1
-                WHERE user_id = ?;
-                """
-        db.execute(query, (user_id, ))
+        raise_permission(permission, user_id, db)
 
         if permission == "admin":
             query = """
@@ -261,11 +256,47 @@ def raise_permissions():
 
     return render_template("raise_permissions.html", form=form, message=message)
 
+
+def raise_permission(permission, user_id, db):
+    query = f"""
+                UPDATE users
+                SET {permission} = 1
+                WHERE user_id = ?;
+                """
+    db.execute(query, (user_id, ))
+
 # TODO route for removing managers
 
 
 # TODO route for adding stores
 # use wtforms validators.NoneOf for making it so that the manager_id is only a manager and not a regular user
+@app.route("/add_store", methods=["GET", "POST"])
+@admin_required
+def add_store():
+    form = StoreForm()
+    db = get_db()
+
+    users_query = """
+                SELECT user_id
+                FROM users
+                WHERE admin = 0;
+                """
+    users = [result["user_id"]
+             for result in db.execute(users_query).fetchall()]
+    form.manager_id.choices = users
+
+    if form.validate_on_submit():
+        manager_id = form.manager_id.data
+
+        store_query = """
+                    INSERT INTO stores (manager_id)
+                    VALUES (?);
+                    """
+        raise_permission("manager", manager_id, db)
+        db.execute(store_query, (manager_id, ))
+        db.commit()
+
+    return render_template("add_store.html", form=form)
 
 
 # TODO route for adding product
