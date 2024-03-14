@@ -87,7 +87,7 @@ class DeliveriesForm(FlaskForm):
                              validators=[InputRequired(), not_equal_to("to_store")])
     day = SelectField("Delivery Day: ",
                       choices=["Sun", "Mon", "Tue",
-                               "Wed", "Thurs", "Fri", "Sat"],
+                               "Wed", "Thu", "Fri", "Sat"],
                       validators=[InputRequired()])
 
     submit = SubmitField("Add Delivery Schedule")
