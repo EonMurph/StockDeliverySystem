@@ -3,19 +3,19 @@ from flask_wtf import FlaskForm
 from wtforms import (IntegerField, PasswordField, SelectField,
                      StringField, FileField,
                      SubmitField, ValidationError)
-from wtforms.validators import EqualTo, InputRequired, Regexp
+from wtforms.validators import EqualTo, InputRequired, Regexp, Optional
 
 
 # custom validator code gotten from wtforms docs
 # https://wtforms.readthedocs.io/en/3.0.x/validators/#custom-validators
 # needed custom `length` as `Length` requires `StringField` and I wanted `IntegerField`
-def length(size):
+def valid_id(size):
 
-    def _length(form, field):
-        if len(str(field.data)) != size:
-            raise ValidationError("User id must be 6 digits.")
+    def _valid_id(form, field):
+        if len(str(field.data)) != size and str(field.data)[0] != 0:
+            raise ValidationError("User id must be 6 digits and must not start with 0.")
 
-    return _length
+    return _valid_id
 
 
 def not_equal_to(compare_field):
@@ -29,7 +29,7 @@ def not_equal_to(compare_field):
 
 class RegistrationForm(FlaskForm):
     user_id = IntegerField("User id: ",
-                           validators=[InputRequired(), length(6)])
+                           validators=[InputRequired(), valid_id(6)])
     password = PasswordField("Password: ", validators=[InputRequired()])
     password2 = PasswordField("Confirm password: ", validators=[
                               InputRequired(),
