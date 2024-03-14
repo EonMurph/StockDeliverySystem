@@ -21,12 +21,12 @@ CREATE TABLE IF NOT EXISTS stores
     FOREIGN KEY (manager_id) REFERENCES users(user_id)
 );
 
-CREATE TABLE IF NOT EXISTS product_in_stores
+CREATE TABLE IF NOT EXISTS products_in_stores
 (
     product_id INTERGER NOT NULL,
-    order_point INTEGER DEFAULT 10,
     store_id INTEGER NOT NULL,
-    amount INTEGER NOT NULL,
+    order_point INTEGER DEFAULT 10,
+    product_amount INTEGER NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(product_id)
     FOREIGN KEY (store_id) REFERENCES stores(store_id)
 );
