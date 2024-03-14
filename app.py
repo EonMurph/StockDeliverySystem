@@ -6,7 +6,7 @@ from flask import (Flask,
 from flask_session import Session
 from database import get_db, close_db
 from forms import (RegistrationForm, LogInForm, PermissionsForm,
-                   ProductForm,)
+                   ProductForm, DeliveriesForm)
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps, partial
 from random import choice
@@ -75,7 +75,8 @@ def homepage():
     reg_form = RegistrationForm()
     db = get_db()
     query = "SELECT store_id from stores;"
-    reg_form.store_id.choices = [result["store_id"] for result in db.execute(query).fetchall()]
+    reg_form.store_id.choices = [result["store_id"]
+                                 for result in db.execute(query).fetchall()]
     login_form = LogInForm()
 
     tips = list(glob("./templates/tips/*.html"))
@@ -208,14 +209,14 @@ def raise_permissions():
                 WHERE user_id = ?;
                 """
         db.execute(query, (user_id, ))
-        
+
         if permission == "admin":
             query = """
                     DELETE FROM employees
                     WHERE employee_id = ?;
                     """
             db.execute(query, (user_id, ))
-        
+
         db.commit()
         message = f"User {user_id} was successfully made {permission}."
 
@@ -225,6 +226,7 @@ def raise_permissions():
 
 
 # TODO route for adding stores
+# use wtforms validators.NoneOf for making it so that the manager_id is only a manager and not a regular user
 # TODO route for adding product
 # possibly do in one route
 @app.route("/add_product", methods=["GET", "POST"])
@@ -246,7 +248,36 @@ def add_product():
 
     return render_template("add_product.html", form=form)
 
+
 # TODO route for soonest delivery
+# TODO route for adding delivery days
+@app.route("/add_delivery", methods=["GET", "POST"])
+def add_deliveries():
+    form = DeliveriesForm()
+    
+    db = get_db()
+    query = """
+            SELECT store_id
+            FROM stores;
+            """
+    choices = [result["store_id"] for result in db.execute(query)]
+    form.to_store.choices = choices
+    form.from_store.choices = choices
+    
+    if form.validate_on_submit():
+        to_store = form.to_store.data
+        from_store = form.from_store.data
+        day = form.day.data
+        
+        query = """
+                INSERT INTO store_delivery_schedule
+                VALUES (?, ?, ?);
+                """
+        db.execute(query, (to_store, from_store, day))
+        db.commit()
+    
+    return render_template("add_delivery.html", form=form)
+
 
 
 # TODO showing stock for their specific store
@@ -265,3 +296,5 @@ def view_stock():
 
 # TODO route for "scanning" and "buying" stock
 # TODO route for notifications when stock is low
+# have it on the homepage
+# a quick welcome back, these products are low in stock, and then a button for which ones you'd like to order

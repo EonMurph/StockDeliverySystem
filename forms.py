@@ -1,3 +1,4 @@
+from ast import In
 from flask_wtf import FlaskForm
 from wtforms import (IntegerField, PasswordField, SelectField,
                      StringField, FileField,
@@ -15,6 +16,14 @@ def length(size):
             raise ValidationError("User id must be 6 digits.")
 
     return _length
+
+def not_equal_to(compare_field):
+    
+    def _not_equal(form, field):
+        if field.data == form[compare_field].data:
+            raise ValidationError("To and from stores must be different.")
+    
+    return _not_equal
 
 
 class RegistrationForm(FlaskForm):
@@ -54,3 +63,18 @@ class ProductForm(FlaskForm):
                               validators=[Regexp(r"(^[0-9a-zA-Z_-]+\b.png\b$)|(^[0-9a-zA-Z_-]+\b.jpg\b$)", message="Only JPG and PNG accepted.")])
 
     submit = SubmitField("Create Product")
+
+
+class DeliveriesForm(FlaskForm):
+    to_store = SelectField("Starting Store: ",
+                           choices=[],
+                           validators=[InputRequired()])
+    from_store = SelectField("Destination Store: ",
+                             choices=[],
+                             validators=[InputRequired(), not_equal_to("to_store")])
+    day = SelectField("Delivery Day: ",
+                       choices=["Sun", "Mon", "Tue",
+                                "Wed", "Thurs", "Fri", "Sat"],
+                       validators=[InputRequired()])
+
+    submit = SubmitField("Add Delivery Schedule")

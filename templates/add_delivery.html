@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+
+<form action="" method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  
+  {% from '_formhelpers.html' import render_field %}
+  
+  {{ render_field(form.to_store) }}
+  <br />
+  
+  {{ render_field(form.from_store) }}
+  <br />
+  
+  {{ render_field(form.day) }}
+  <br />
+  
+  {{ form.submit() }}
+</form>
+  
+{% endblock %}
