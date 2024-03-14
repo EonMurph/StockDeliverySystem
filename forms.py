@@ -24,6 +24,10 @@ class RegistrationForm(FlaskForm):
     password2 = PasswordField("Confirm password: ", validators=[
                               InputRequired(),
                               EqualTo("password", "Your passwords don't match.")])
+    store_id = SelectField("Employee's store: ",
+                           choices=[],
+                           validators=[InputRequired()])
+
     submit = SubmitField("Register Account")
 
 

@@ -73,6 +73,9 @@ def homepage():
         return render_template("homepage.html")
 
     reg_form = RegistrationForm()
+    db = get_db()
+    query = "SELECT store_id from stores;"
+    reg_form.store_id.choices = [result["store_id"] for result in db.execute(query).fetchall()]
     login_form = LogInForm()
 
     tips = list(glob("./templates/tips/*.html"))
@@ -101,6 +104,7 @@ def register(form):
     user_id = form.user_id.data
     password = form.password.data
     password2 = form.password2.data
+    store_id = form.store_id.data
 
     db = get_db()
     query = """
@@ -116,6 +120,13 @@ def register(form):
                 VALUES (?, ?)
                 """
         db.execute(query, (user_id, generate_password_hash(password)))
+
+        query = """
+                INSERT INTO employees (store_id, employee_id)
+                VALUES (?, ?);
+                """
+        db.execute(query, (store_id, user_id))
+
         db.commit()
 
         session["user_id"] = user_id
@@ -197,14 +208,25 @@ def raise_permissions():
                 WHERE user_id = ?;
                 """
         db.execute(query, (user_id, ))
+        
+        if permission == "admin":
+            query = """
+                    DELETE FROM employees
+                    WHERE employee_id = ?;
+                    """
+            db.execute(query, (user_id, ))
+        
         db.commit()
         message = f"User {user_id} was successfully made {permission}."
 
     return render_template("raise_permissions.html", form=form, message=message)
 
+# TODO route for removing managers
+
 
 # TODO route for adding stores
 # TODO route for adding product
+# possibly do in one route
 @app.route("/add_product", methods=["GET", "POST"])
 @admin_required
 def add_product():
@@ -223,7 +245,6 @@ def add_product():
         db.commit()
 
     return render_template("add_product.html", form=form)
-# possibly do in one route
 
 # TODO route for soonest delivery
 
@@ -238,7 +259,7 @@ def view_stock():
             FROM products;
             """
     products = db.execute(query).fetchall()
-    
+
     return render_template("products_page.html", products=products)
 
 
