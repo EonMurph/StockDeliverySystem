@@ -29,12 +29,12 @@ def init_admin():
     app.before_request_funcs[None].remove(init_admin) """
 
     db = get_db()
-    query = """
+    admin_query = """
             INSERT INTO users (user_id, password, admin)
             VALUES (1, ?, 1);
             """
     try:
-        db.execute(query, (generate_password_hash("secret"), ))
+        db.execute(admin_query, (generate_password_hash("secret"), ))
         db.commit()
     except sqlite3.IntegrityError:
         pass
@@ -81,9 +81,9 @@ def homepage():
 def register():
     form = RegistrationForm()
     db = get_db()
-    query = "SELECT store_id from stores;"
+    store_id_query = "SELECT store_id from stores;"
     form.store_id.choices = [result["store_id"]
-                             for result in db.execute(query).fetchall()]
+                             for result in db.execute(store_id_query).fetchall()]
 
     tips = list(glob("./templates/tips/*.html"))
     for i in range(len(tips)):
@@ -100,25 +100,25 @@ def register():
         store_id = form.store_id.data
 
         db = get_db()
-        query = """
+        conflict_query = """
                 SELECT *
                 FROM users
                 WHERE user_id = ?;
                 """
-        if db.execute(query, (user_id,)).fetchone():
+        if db.execute(conflict_query, (user_id,)).fetchone():
             form.user_id.errors.append("Username already taken.")
         else:
-            query = """
+            create_user_query = """
                     INSERT INTO users (user_id, password)
                     VALUES (?, ?)
                     """
-            db.execute(query, (user_id, generate_password_hash(password)))
+            db.execute(create_user_query, (user_id, generate_password_hash(password)))
 
-            query = """
+            create_employee_query = """
                     INSERT INTO employees (store_id, employee_id)
                     VALUES (?, ?);
                     """
-            db.execute(query, (store_id, user_id))
+            db.execute(create_employee_query, (store_id, user_id))
 
             db.commit()
 
@@ -137,31 +137,24 @@ def log_in():
         password = form.password.data
 
         db = get_db()
-        query = """
-                SELECT user_id, password
+        find_user_query = """
+                SELECT *
                 FROM users
                 WHERE user_id = ?;
                 """
-        if user_data := db.execute(query, (user_id,)).fetchone():
+        if user_data := db.execute(find_user_query, (user_id,)).fetchone():
             if check_password_hash(user_data["password"], password):
 
                 session.clear()
 
-                query = """
-                        SELECT *
-                        FROM users
-                        WHERE user_id = ?;
-                        """
-                user_data = db.execute(query, (user_id,)).fetchone()
-
                 if user_data["admin"] == 1:
                     session["admin"] = True
                 else:
-                    query = """
+                    find_store_query = """
                             SELECT store_id
                             FROM employees
                             WHERE employee_id = ?"""
-                    store_id = db.execute(query, (user_id, )).fetchone()[
+                    store_id = db.execute(find_store_query, (user_id, )).fetchone()[
                         "store_id"]
                     session["store_id"] = store_id
 
@@ -192,21 +185,21 @@ def raise_permissions():
     db = get_db()
     message = ''
 
-    query = """
+    valid_users_query = """
             SELECT *
             FROM users
             WHERE admin = 0
                 AND manager = 0;
             """
     users = [result["user_id"]
-             for result in db.execute(query).fetchall()]
+             for result in db.execute(valid_users_query).fetchall()]
     form.user_ids.choices = users
 
-    query = """
+    store_ids_query = """
             SELECT store_id
             FROM stores;
             """
-    store_ids = [result["store_id"] for result in db.execute(query).fetchall()]
+    store_ids = [result["store_id"] for result in db.execute(store_ids_query).fetchall()]
     form.store_id.choices = store_ids
 
     if form.validate_on_submit():
@@ -217,11 +210,11 @@ def raise_permissions():
         raise_permission(permission, user_id, db)
 
         if permission == "admin":
-            query = """
+            delete_employee_query = """
                     DELETE FROM employees
                     WHERE employee_id = ?;
                     """
-            db.execute(query, (user_id, ))
+            db.execute(delete_employee_query, (user_id, ))
         else:
             if not store_id:
                 form.store_id.errors.append(
@@ -241,12 +234,12 @@ def raise_permissions():
                         """
                 db.execute(demote_query, (manager_id, ))
 
-                query = """
+                change_manager_query = """
                         UPDATE stores
                         SET manager_id = ?
                         WHERE store_id = ?;
                         """
-                db.execute(query, (user_id, store_id))
+                db.execute(change_manager_query, (user_id, store_id))
 
         db.commit()
         message = f"User {user_id} was successfully made {permission}."
@@ -255,12 +248,12 @@ def raise_permissions():
 
 
 def raise_permission(permission, user_id, db):
-    query = f"""
+    raise_permissions_query = f"""
                 UPDATE users
                 SET {permission} = 1
                 WHERE user_id = ?;
                 """
-    db.execute(query, (user_id, ))
+    db.execute(raise_permissions_query, (user_id, ))
 
 # TODO route for removing managers
 
@@ -305,29 +298,28 @@ def add_product():
         # TODO upload image to static folder
 
         db = get_db()
-        query = """
+        create_product_query = """
                 INSERT INTO products (product_name, product_image)
                 VALUES (?, ?);
                 """
-        db.execute(query, (product_name, product_image))
+        db.execute(create_product_query, (product_name, product_image))
         db.commit()
 
     return render_template("add_product.html", form=form)
 
 
 # TODO route for soonest delivery
-# TODO route for adding delivery days
 @app.route("/add_delivery", methods=["GET", "POST"])
 @admin_required
 def add_deliveries():
     form = DeliveriesForm()
 
     db = get_db()
-    query = """
+    store_ids_query = """
             SELECT store_id
             FROM stores;
             """
-    choices = [result["store_id"] for result in db.execute(query).fetchall()]
+    choices = [result["store_id"] for result in db.execute(store_ids_query).fetchall()]
     form.to_store.choices = choices
     form.from_store.choices = choices
 
