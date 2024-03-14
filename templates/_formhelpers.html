@@ -6,7 +6,7 @@ https://flask.palletsprojects.com/en/3.0.x/patterns/wtforms/#forms-in-templates 
 {{ field.label }}
 {{ field(**kwargs) | safe }}
 {% for error in field.errors %}
-{{ error }}
+<p class="error">{{ error }}</p>
 {% endfor %}
 
 {% endmacro %}
