@@ -3,6 +3,7 @@ __pycache__
 app.db
 settings.json
 testing.sql
+test_data.sql
 flask_session
 static/**/*.png
 static/**/*.jpg
