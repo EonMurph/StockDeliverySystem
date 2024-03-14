@@ -1,18 +1,9 @@
-PRAGMA foreign_keys = 1;
-
--- DROP TABLE IF EXISTS users;
--- DROP TABLE IF EXISTS products;
--- DROP TABLE IF EXISTS stores;
--- DROP TABLE IF EXISTS products_in_stores;
--- DROP TABLE IF EXISTS employees;
--- DROP TABLE IF EXISTS store_delivery_schedule
-
 CREATE TABLE IF NOT EXISTS users
 (
     user_id INTEGER PRIMARY KEY,
-    password TEXT NOT NULL,
     admin BOOL NOT NULL DEFAULT '0',
-    manager BOOL NOT NULL DEFAULT '0'
+    manager BOOL NOT NULL DEFAULT '0',
+    password TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS products
