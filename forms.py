@@ -47,7 +47,6 @@ class ProductForm(FlaskForm):
     product_name = StringField("Product name: ",
                                validators=[InputRequired()])
     product_image = FileField("Product Image",
-                              validators=[Regexp(r"(^[0-9a-zA-Z_-]+\b.png\b$)|(^[0-9a-zA-Z_-]+\b.jpg\b$)",
-                                                 message="Only JPG and PNG accepted.")])
+                              validators=[Regexp(r"(^[0-9a-zA-Z_-]+\b.png\b$)|(^[0-9a-zA-Z_-]+\b.jpg\b$)", message="Only JPG and PNG accepted.")])
 
     submit = SubmitField("Create Product")

@@ -1,4 +1,9 @@
 -- DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS products;
+-- DROP TABLE IF EXISTS stores;
+-- DROP TABLE IF EXISTS products_in_stores;
+-- DROP TABLE IF EXISTS employees;
+
 CREATE TABLE IF NOT EXISTS users
 (
     user_id INTEGER PRIMARY KEY,
@@ -7,15 +12,14 @@ CREATE TABLE IF NOT EXISTS users
     manager BOOL NOT NULL DEFAULT '0'
 );
 
--- DROP TABLE IF EXISTS products;
 CREATE TABLE IF NOT EXISTS products
 (
     product_id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_name TEXT,
-    product_image TEXT
+    product_image TEXT DEFAULT 'default.png'
+    
 );
 
--- DROP TABLE IF EXISTS stores;
 CREATE TABLE IF NOT EXISTS stores
 (
     store_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +27,6 @@ CREATE TABLE IF NOT EXISTS stores
     FOREIGN KEY (manager_id) REFERENCES users(user_id)
 );
 
--- DROP TABLE IF EXISTS products_in_stores;
 CREATE TABLE IF NOT EXISTS product_in_stores
 (
     product_id INTERGER
