@@ -3,5 +3,10 @@
 {% block main_content %}
 
 <!-- TODO have welcome page depending on what store they work in -->
+{% if g.admin %}
+<p>Welcome back admin user {{ g.user }}.</p>
+{% else %}
+<p>{{ g.store }}</p>
+{% endif %}
 
 {% endblock %}

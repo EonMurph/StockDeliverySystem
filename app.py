@@ -6,7 +6,7 @@ from flask import (Flask,
 from flask_session import Session
 from database import get_db, close_db
 from forms import (RegistrationForm, LogInForm, PermissionsForm,
-                   ProductForm, DeliveriesForm)
+                   ProductForm, StoreForm, DeliveriesForm)
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps, partial
 from random import choice
@@ -47,6 +47,7 @@ def load_logged_in_user():
     g.manager = session.get("manager", False)
     g.restrictions = session.get("restrictions", None)
     g.restricted = session.get("restricted", False)
+    g.store = session.get("store_id", None)
 
 
 def restricted(view, restriction):
@@ -90,11 +91,11 @@ def homepage():
 
     if reg_form.validate_on_submit():
         reg_form = register(reg_form)
-        if session["user_id"]:
+        if session.get("user_id", None):
             return redirect(url_for("homepage"))
     if login_form.validate_on_submit():
         login_form = log_in(login_form)
-        if session["user_id"]:
+        if session.get("user_id", None):
             next_page = request.args.get("next") or url_for("homepage")
             return redirect(next_page)
 
@@ -131,6 +132,7 @@ def register(form):
         db.commit()
 
         session["user_id"] = user_id
+        session["store_id"] = store_id
 
     return form
 
@@ -159,6 +161,14 @@ def log_in(form):
 
             if user_data["admin"] == 1:
                 session["admin"] = True
+            else:
+                query = """
+                        SELECT store_id
+                        FROM employees
+                        WHERE employee_id = ?"""
+                store_id = db.execute(query, (user_id, )).fetchone()[
+                    "store_id"]
+                session["store_id"] = store_id
 
             session["user_id"] = user_id
 
@@ -182,6 +192,7 @@ def log_out():
 @admin_required
 def raise_permissions():
     form = PermissionsForm()
+    db = get_db()
     message = ''
 
     query = """
@@ -190,18 +201,21 @@ def raise_permissions():
             WHERE admin = 0
                 AND manager = 0;
             """
-
-    db = get_db()
     users = [result["user_id"]
              for result in db.execute(query).fetchall()]
-
     form.user_ids.choices = users
+
+    query = """
+            SELECT store_id
+            FROM stores;
+            """
+    store_ids = [result["store_id"] for result in db.execute(query).fetchall()]
+    form.store_id.choices = store_ids
 
     if form.validate_on_submit():
         user_id = form.user_ids.data
+        store_id = form.store_id.data
         permission = "admin" if form.admin_submit.data else "manager"
-
-        print(user_id, permission)
 
         query = f"""
                 UPDATE users
@@ -216,6 +230,31 @@ def raise_permissions():
                     WHERE employee_id = ?;
                     """
             db.execute(query, (user_id, ))
+        else:
+            if not store_id:
+                form.store_id.errors.append(
+                    "This input is required with a manager promotion.")
+            else:
+                manager_id_query = """
+                        SELECT manager_id
+                        FROM stores
+                        WHERE store_id = ?;
+                        """
+                manager_id = db.execute(manager_id_query, (store_id, )).fetchone()[
+                    "manager_id"]
+                demote_query = """
+                        UPDATE users
+                        SET manager = 0
+                        WHERE user_id = ?;
+                        """
+                db.execute(demote_query, (manager_id, ))
+
+                query = """
+                        UPDATE stores
+                        SET manager_id = ?
+                        WHERE store_id = ?;
+                        """
+                db.execute(query, (user_id, store_id))
 
         db.commit()
         message = f"User {user_id} was successfully made {permission}."
@@ -227,6 +266,8 @@ def raise_permissions():
 
 # TODO route for adding stores
 # use wtforms validators.NoneOf for making it so that the manager_id is only a manager and not a regular user
+
+
 # TODO route for adding product
 # possibly do in one route
 @app.route("/add_product", methods=["GET", "POST"])
@@ -237,6 +278,7 @@ def add_product():
     if form.validate_on_submit():
         product_name = form.product_name.data
         product_image = form.product_image.data
+        # TODO upload image to static folder
 
         db = get_db()
         query = """
@@ -252,32 +294,32 @@ def add_product():
 # TODO route for soonest delivery
 # TODO route for adding delivery days
 @app.route("/add_delivery", methods=["GET", "POST"])
+@admin_required
 def add_deliveries():
     form = DeliveriesForm()
-    
+
     db = get_db()
     query = """
             SELECT store_id
             FROM stores;
             """
-    choices = [result["store_id"] for result in db.execute(query)]
+    choices = [result["store_id"] for result in db.execute(query).fetchall()]
     form.to_store.choices = choices
     form.from_store.choices = choices
-    
+
     if form.validate_on_submit():
         to_store = form.to_store.data
         from_store = form.from_store.data
         day = form.day.data
-        
+
         query = """
                 INSERT INTO store_delivery_schedule
                 VALUES (?, ?, ?);
                 """
         db.execute(query, (to_store, from_store, day))
         db.commit()
-    
-    return render_template("add_delivery.html", form=form)
 
+    return render_template("add_delivery.html", form=form)
 
 
 # TODO showing stock for their specific store

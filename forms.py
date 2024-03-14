@@ -17,12 +17,13 @@ def length(size):
 
     return _length
 
+
 def not_equal_to(compare_field):
-    
+
     def _not_equal(form, field):
         if field.data == form[compare_field].data:
             raise ValidationError("To and from stores must be different.")
-    
+
     return _not_equal
 
 
@@ -51,6 +52,8 @@ class PermissionsForm(FlaskForm):
     user_ids = SelectField("User to change permissions of: ",
                            choices=[],
                            validators=[InputRequired()])
+    store_id = SelectField("Manages Store (only used for manager): ",
+                           choices=[])
 
     admin_submit = SubmitField("Make Admin")
     manager_submit = SubmitField("Make Manager")
@@ -73,8 +76,8 @@ class DeliveriesForm(FlaskForm):
                              choices=[],
                              validators=[InputRequired(), not_equal_to("to_store")])
     day = SelectField("Delivery Day: ",
-                       choices=["Sun", "Mon", "Tue",
-                                "Wed", "Thurs", "Fri", "Sat"],
-                       validators=[InputRequired()])
+                      choices=["Sun", "Mon", "Tue",
+                               "Wed", "Thurs", "Fri", "Sat"],
+                      validators=[InputRequired()])
 
     submit = SubmitField("Add Delivery Schedule")
