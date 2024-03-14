@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = 1;
+
 -- DROP TABLE IF EXISTS users;
 -- DROP TABLE IF EXISTS products;
 -- DROP TABLE IF EXISTS stores;

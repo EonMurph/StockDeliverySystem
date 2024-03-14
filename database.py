@@ -9,6 +9,7 @@ def get_db():
         g.db = sqlite3.connect(DATABASE,
             detect_types=sqlite3.PARSE_DECLTYPES
         )
+        g.db.execute("PRAGMA foreign_keys = 1;")
         g.db.row_factory = sqlite3.Row
     return g.db
 
