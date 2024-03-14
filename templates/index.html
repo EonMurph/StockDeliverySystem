@@ -4,57 +4,34 @@
 {% block css%}
 <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}" />
 {% endblock %}
-{% block javascript %}
-<script src="{{ url_for('static', filename='main.js') }}"
-  type="text/javascript" type></script>
-{% endblock %}
 
 {% block main_content %}
 <section id="tips">
   {% block tip %}
   {% endblock %}
 </section>
-<section id="login">
+<section id="register">
   <h3>Welcome</h3>
 
-  <div class="button_div">
-    <button id="reg_button">Register</button>
-    <button id="login_button">Log In</button>
-  </div>
-  <div class="form_div">
-    <form action method="POST" novalidate id="reg_form">
-      {{ reg_form.hidden_tag() }}
+  <form action method="POST" novalidate>
+    {{ form.hidden_tag() }}
 
-      {% from "_formhelpers.html" import render_field %}
+    {% from "_formhelpers.html" import render_field %}
 
-      {{ render_field(reg_form.user_id)}}
-      <br />
+    {{ render_field(form.user_id)}}
+    <br />
 
-      {{ render_field(reg_form.password) }}
-      <br />
+    {{ render_field(form.password) }}
+    <br />
 
-      {{ render_field(reg_form.password2) }}
-      <br />
-      
-      {{ render_field(reg_form.store_id) }}
-      <br />
+    {{ render_field(form.password2) }}
+    <br />
 
-      {{ reg_form.submit() }}
-    </form>
-    <form action method="POST" novalidate id="login_form">
-      {{ login_form.hidden_tag() }}
+    {{ render_field(form.store_id) }}
+    <br />
 
-      {% from "_formhelpers.html" import render_field %}
-
-      {{ render_field(login_form.user_id) }}
-      <br />
-
-      {{ render_field(login_form.password) }}
-      <br />
-
-      {{ login_form.submit() }}
-    </form>
-  </div>
+    {{ form.submit() }}
+  </form>
   <!-- <section id="restricted_notice">
     {% if g.restricted %}
     <p>The area you tried to access was blocked.</p>

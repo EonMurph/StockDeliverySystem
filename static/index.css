@@ -8,7 +8,7 @@ body {
 }
 
 /* | Split Design */
-main:has(#login) {
+main:has(#register) {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -18,15 +18,15 @@ main:has(#login) {
     width: calc(100vw - var(--login-width));
   }
 
-  #login {
+  #register {
     width: var(--login-width);
   }
 }
 
 /* | Tips screen */
 
-/* | Login items */
-#login {
+/* | Register items */
+#register {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -53,11 +53,12 @@ main:has(#login) {
       &#login_form {
         display: none;
       }
-      &#login_form, &#reg_form {
+      &#login_form,
+      &#reg_form {
         grid-column: 1;
         grid-row: 1;
       }
-      
+
       /* >label:not(label[type="submit"]) {
         width: 20em;
       } */
