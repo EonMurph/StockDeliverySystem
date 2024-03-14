@@ -265,8 +265,6 @@ def raise_permission(permission, user_id, db):
 # TODO route for removing managers
 
 
-# TODO route for adding stores
-# use wtforms validators.NoneOf for making it so that the manager_id is only a manager and not a regular user
 @app.route("/add_store", methods=["GET", "POST"])
 @admin_required
 def add_store():
@@ -296,8 +294,6 @@ def add_store():
     return render_template("add_store.html", form=form)
 
 
-# TODO route for adding product
-# possibly do in one route
 @app.route("/add_product", methods=["GET", "POST"])
 @admin_required
 def add_product():
