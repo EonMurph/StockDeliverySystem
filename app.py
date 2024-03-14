@@ -5,7 +5,8 @@ from flask import (Flask,
                    session, g)
 from flask_session import Session
 from database import get_db, close_db
-from forms import (RegistrationForm, LogInForm, PermissionsForm)
+from forms import (RegistrationForm, LogInForm, PermissionsForm,
+                   ProductForm,)
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps, partial
 from random import choice
@@ -155,7 +156,6 @@ def log_in(form):
     else:
         form.user_id.errors.append("Incorrect user id.")
 
-
     return form
 
 
@@ -205,6 +205,41 @@ def raise_permissions():
 
 # TODO route for adding stores
 # TODO route for adding product
+@app.route("/add_product", methods=["GET", "POST"])
+@admin_required
+def add_product():
+    form = ProductForm()
+
+    if form.validate_on_submit():
+        product_name = form.product_name.data
+        product_image = form.product_image.data
+
+        db = get_db()
+        query = """
+                INSERT INTO products (product_name, product_image)
+                VALUES (?, ?);
+                """
+        db.execute(query, (product_name, product_image))
+        db.commit()
+
+    return render_template("add_product.html", form=form)
 # possibly do in one route
 
 # TODO route for soonest delivery
+
+
+# TODO route for viewing stock
+@app.route("/stock")
+def view_stock():
+    db = get_db()
+    query = """
+            SELECT *
+            FROM products;
+            """
+    products = db.execute(query).fetchall()
+    
+    return render_template("products_page.html", products=products)
+
+
+# TODO route for "scanning" and "buying" stock
+# TODO route for notifications when stock is low

@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import (IntegerField, PasswordField, SelectField,
+                     StringField, FileField,
                      SubmitField, ValidationError)
-from wtforms.validators import EqualTo, InputRequired
+from wtforms.validators import EqualTo, InputRequired, Regexp
 
 
 # custom validator code gotten from wtforms docs
@@ -23,20 +24,30 @@ class RegistrationForm(FlaskForm):
     password2 = PasswordField("Confirm password: ", validators=[
                               InputRequired(),
                               EqualTo("password", "Your passwords don't match.")])
-    submit = SubmitField("Submit")
+    submit = SubmitField("Register Account")
 
 
 class LogInForm(FlaskForm):
     user_id = IntegerField("User id: ", validators=[InputRequired()])
     password = PasswordField("Password: ", validators=[InputRequired()])
 
-    submit = SubmitField("Submit")
+    submit = SubmitField("Log In")
 
 
 class PermissionsForm(FlaskForm):
     user_ids = SelectField("User to change permissions of: ",
                            choices=[],
-                           validators=[])
+                           validators=[InputRequired()])
 
     admin_submit = SubmitField("Make Admin")
     manager_submit = SubmitField("Make Manager")
+
+
+class ProductForm(FlaskForm):
+    product_name = StringField("Product name: ",
+                               validators=[InputRequired()])
+    product_image = FileField("Product Image",
+                              validators=[Regexp(r"(^[0-9a-zA-Z_-]+\b.png\b$)|(^[0-9a-zA-Z_-]+\b.jpg\b$)",
+                                                 message="Only JPG and PNG accepted.")])
+
+    submit = SubmitField("Create Product")
