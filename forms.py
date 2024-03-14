@@ -13,7 +13,8 @@ def valid_id(size):
 
     def _valid_id(form, field):
         if len(str(field.data)) != size and str(field.data)[0] != 0:
-            raise ValidationError("User id must be 6 digits and must not start with 0.")
+            raise ValidationError(
+                "User id must be 6 digits and must not start with 0.")
 
     return _valid_id
 

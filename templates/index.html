@@ -32,6 +32,9 @@
 
     {{ form.submit() }}
   </form>
+  <p>Already have an account?
+    <a href="{{ url_for('log_in') }}">Log In.</a>
+  </p>
   <!-- <section id="restricted_notice">
     {% if g.restricted %}
     <p>The area you tried to access was blocked.</p>

@@ -58,7 +58,7 @@ def restricted(view, restriction):
             session["restrictions"] = restriction
             session["restricted"] = True
 
-            return redirect(url_for("homepage", next=request.url))
+            return redirect(url_for("log_in", next=request.url))
         return view(*args, **kwargs)
     return wrapped_view
 
@@ -112,7 +112,8 @@ def register():
                     INSERT INTO users (user_id, password)
                     VALUES (?, ?)
                     """
-            db.execute(create_user_query, (user_id, generate_password_hash(password)))
+            db.execute(create_user_query,
+                       (user_id, generate_password_hash(password)))
 
             create_employee_query = """
                     INSERT INTO employees (store_id, employee_id)
@@ -199,7 +200,8 @@ def raise_permissions():
             SELECT store_id
             FROM stores;
             """
-    store_ids = [result["store_id"] for result in db.execute(store_ids_query).fetchall()]
+    store_ids = [result["store_id"]
+                 for result in db.execute(store_ids_query).fetchall()]
     form.store_id.choices = store_ids
 
     if form.validate_on_submit():
@@ -254,8 +256,6 @@ def raise_permission(permission, user_id, db):
                 WHERE user_id = ?;
                 """
     db.execute(raise_permissions_query, (user_id, ))
-
-# TODO route for removing managers
 
 
 @app.route("/add_store", methods=["GET", "POST"])
@@ -319,7 +319,8 @@ def add_deliveries():
             SELECT store_id
             FROM stores;
             """
-    choices = [result["store_id"] for result in db.execute(store_ids_query).fetchall()]
+    choices = [result["store_id"]
+               for result in db.execute(store_ids_query).fetchall()]
     form.to_store.choices = choices
     form.from_store.choices = choices
 
