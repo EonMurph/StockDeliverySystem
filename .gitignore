@@ -4,3 +4,5 @@ app.db
 settings.json
 testing.sql
 flask_session
+static/**/*.png
+static/**/*.jpg
