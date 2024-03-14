@@ -228,7 +228,8 @@ def add_product():
 # TODO route for soonest delivery
 
 
-# TODO route for viewing stock
+# TODO showing stock for their specific store
+# TODO show amount of stock
 @app.route("/stock")
 def view_stock():
     db = get_db()
