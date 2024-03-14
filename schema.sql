@@ -5,6 +5,7 @@ PRAGMA foreign_keys = 1;
 -- DROP TABLE IF EXISTS stores;
 -- DROP TABLE IF EXISTS products_in_stores;
 -- DROP TABLE IF EXISTS employees;
+-- DROP TABLE IF EXISTS store_delivery_schedule
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS products
 CREATE TABLE IF NOT EXISTS stores
 (
     store_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    store_name TEXT,
     manager_id INTEGER NOT NULL,
     FOREIGN KEY (manager_id) REFERENCES users(user_id)
 );
@@ -45,4 +47,13 @@ CREATE TABLE IF NOT EXISTS employees
     employee_id INTEGER NOT NULL,
     FOREIGN KEY (store_id) REFERENCES stores(store_id),
     FOREIGN KEY (employee_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS store_delivery_schedule
+(
+    to_store INTEGER NOT NULL,
+    from_store INTEGER NOT NULL,
+    day TEXT NOT NULL,
+    FOREIGN KEY (to_store) REFERENCES stores(store_id),
+    FOREIGN KEY (from_store) REFERENCES stores(store_id)
 );
