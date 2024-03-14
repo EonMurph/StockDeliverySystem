@@ -52,8 +52,9 @@ class PermissionsForm(FlaskForm):
     user_ids = SelectField("User to change permissions of: ",
                            choices=[],
                            validators=[InputRequired()])
-    store_id = SelectField("Manages Store (only used for manager): ",
-                           choices=[])
+    store_id = SelectField("Manages Store: \n(only used for manager)",
+                           choices=[],
+                           validators=[Optional()])
 
     admin_submit = SubmitField("Make Admin")
     manager_submit = SubmitField("Make Manager")
@@ -66,6 +67,14 @@ class ProductForm(FlaskForm):
                               validators=[Regexp(r"(^[0-9a-zA-Z_-]+\b.png\b$)|(^[0-9a-zA-Z_-]+\b.jpg\b$)", message="Only JPG and PNG accepted.")])
 
     submit = SubmitField("Create Product")
+
+
+class StoreForm(FlaskForm):
+    manager_id = SelectField("Store Manager: ",
+                             choices=[],
+                             validators=[InputRequired()])
+
+    submit = SubmitField("Create Store")
 
 
 class DeliveriesForm(FlaskForm):
