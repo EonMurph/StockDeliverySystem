@@ -81,7 +81,7 @@ def homepage():
 def register():
     form = RegistrationForm()
     db = get_db()
-    store_id_query = "SELECT store_id from stores;"
+    store_id_query = "SELECT store_id FROM stores;"
     form.store_id.choices = [result["store_id"]
                              for result in db.execute(store_id_query).fetchall()]
 
@@ -294,21 +294,21 @@ def add_product():
 
     if form.validate_on_submit():
         product_name = form.product_name.data
-        product_image = form.product_image.data
-        # TODO upload image to static folder
 
         db = get_db()
         create_product_query = """
-                INSERT INTO products (product_name, product_image)
-                VALUES (?, ?);
+                INSERT INTO products (product_name)
+                VALUES (?);
                 """
-        db.execute(create_product_query, (product_name, product_image))
+        db.execute(create_product_query, (product_name))
         db.commit()
 
     return render_template("add_product.html", form=form)
 
 
 # TODO route for soonest delivery
+
+
 @app.route("/add_delivery", methods=["GET", "POST"])
 @admin_required
 def add_deliveries():
@@ -329,11 +329,11 @@ def add_deliveries():
         from_store = form.from_store.data
         day = form.day.data
 
-        query = """
+        create_route_query = """
                 INSERT INTO store_delivery_schedule
                 VALUES (?, ?, ?);
                 """
-        db.execute(query, (to_store, from_store, day))
+        db.execute(create_route_query, (to_store, from_store, day))
         db.commit()
 
     return render_template("add_delivery.html", form=form)

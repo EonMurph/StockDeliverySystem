@@ -9,9 +9,7 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS products
 (
     product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_name TEXT NOT NULL,
-    product_image TEXT NOT NULL DEFAULT 'default.png'
-    
+    product_name TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS stores

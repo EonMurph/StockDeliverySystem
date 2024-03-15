@@ -4,8 +4,6 @@
 
 {% for product in products %}
 <div>
-  <!-- TODO fix image displaying -->
-  <img src="{{ url_for('static', filename='product_images/'+product['product_image']) }}" alt="product image for {{ product['product_name'] }}"/>
   <h2>{{ product["product_name"] }}</h2>
 </div>
 {% endfor %}
