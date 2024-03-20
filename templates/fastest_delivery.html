@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+  <h2>Delivery for {{ product_id }} to {{ target_store }}</h2>
+  <p>The delivery will take {{ duration }} day(s).</p>
+  {% for path in route %}
+    <p>{{ path }}</p>
+  {% endfor %}
+  <p>Return to
+    <a href="{{ url_for('cart') }}">cart.</a>
+  </p>
+{% endblock %}

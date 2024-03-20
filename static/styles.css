@@ -29,15 +29,19 @@ main:has(form) {
     label {
       grid-column: 1;
     }
-    input:not(input[type="submit"]), select {
+    input:not(input[type="submit"]),
+    select {
       grid-column: 2;
       width: 8em;
       box-sizing: border-box;
-      
-      &~p.error {
-        color: red;
+
+      & ~ p.error {
         grid-column: 1/-1;
       }
     }
   }
+}
+
+.error {
+  color: red;
 }

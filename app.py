@@ -1,3 +1,8 @@
+"""
+admin login - username: 1, password: secret
+all manager logins are 111111 for store 1, 222222 for store 2, etc. and all passwords are 123
+"""
+
 import sqlite3  # imported just for `sqlite3.IntegrityError`
 from flask import (Flask,
                    render_template,
@@ -12,6 +17,9 @@ from functools import wraps, partial
 from random import choice
 from os import path
 from glob import glob
+from delivery_setup import get_delivery_dict, get_delivery_table, DAYS_OF_WEEK, get_source_stores
+from search_funcs import perform_search, get_duration, get_route
+from datetime import date
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "this-is-my-secret-key"
@@ -24,10 +32,6 @@ app.teardown_appcontext(close_db)
 
 @app.before_request
 def init_admin():
-    # TODO see if you can get `before_first_request` working
-    """ # next line found on https://stackoverflow.com/questions/73570041/flask-deprecated-before-first-request-how-to-update
-    app.before_request_funcs[None].remove(init_admin) """
-
     db = get_db()
     admin_query = """
             INSERT INTO users (user_id, password, admin)
@@ -85,13 +89,12 @@ def register():
     form.store_id.choices = [result["store_id"]
                              for result in db.execute(store_id_query).fetchall()]
 
-    tips = list(glob("./templates/tips/*.html"))
-    for i in range(len(tips)):
-        parent = path.basename(path.dirname(tips[i]))
-        file_name = path.basename(tips[i])
-        tips[i] = str(path.join(parent, file_name)).replace("\\", "/")
-    # TODO populate tips and remove next line
-    index = choice(tips) if tips else "index.html"
+    # tips = list(glob("./templates/tips/*.html"))
+    # for i in range(len(tips)):
+    #     parent = path.basename(path.dirname(tips[i]))
+    #     file_name = path.basename(tips[i])
+    #     tips[i] = str(path.join(parent, file_name)).replace("\\", "/")
+    # index = choice(tips) if tips else "index.html"
 
     if form.validate_on_submit():
         user_id = form.user_id.data
@@ -126,7 +129,9 @@ def register():
             session["user_id"] = user_id
             session["store_id"] = store_id
 
-    return render_template(index, form=form)
+            return redirect(url_for("homepage"))
+
+    return render_template("index.html", form=form)
 
 
 @app.route("/log_in", methods=["GET", "POST"])
@@ -151,6 +156,9 @@ def log_in():
                 if user_data["admin"] == 1:
                     session["admin"] = True
                 else:
+                    if user_data["manager"] == 1:
+                        session["manager"] = True
+
                     find_store_query = """
                             SELECT store_id
                             FROM employees
@@ -306,7 +314,56 @@ def add_product():
     return render_template("add_product.html", form=form)
 
 
-# TODO route for soonest delivery
+@app.route("/get_delivery/<int:product_id>", defaults={"order_day": DAYS_OF_WEEK.index(date.today().strftime("%a"))})
+@app.route("/get_delivery/<int:product_id>/<int:order_day>")
+def get_delivery(product_id, order_day):
+    """Using an employee from store 3 with a product id of 3, will return a route when using the test data."""
+    if g.store:
+        db = get_db()
+        delivery_table = get_delivery_table(db)
+        delivery_dict = get_delivery_dict(delivery_table)
+        source_stores = get_source_stores(db, product_id)
+
+        target_store = int(g.store)
+        delivery_timetable = perform_search(
+            delivery_dict, target_store, source_stores, order_day)
+        print(delivery_timetable)
+        duration = get_duration(order_day, target_store, delivery_timetable)
+        route = get_route(target_store, delivery_timetable)
+
+        return render_template("fastest_delivery.html", route=route, duration=duration, product_id=product_id, target_store=target_store)
+    return redirect(url_for("log_in"))
+
+
+@app.route("/order_products/<int:product_id>")
+def order_products(product_id):
+    if not g.user:
+        return redirect("register")
+    if "cart" not in session:
+        session["cart"] = {}
+    if product_id not in session["cart"]:
+        session["cart"][product_id] = 1
+    else:
+        session["cart"][product_id] += 1
+
+    return redirect(url_for("cart"))
+
+
+@app.route("/cart")
+def cart():
+    if not g.user:
+        return redirect("register")
+    if "cart" not in session:
+        session["cart"] = {}
+    names = {}
+    db = get_db()
+    for product_id in session["cart"]:
+        product = db.execute("SELECT * FROM products WHERE product_id = ?;",
+                             (product_id, )).fetchone()
+        name = product["product_name"]
+        names[product_id] = name
+
+    return render_template("cart.html", cart=session["cart"], names=names)
 
 
 @app.route("/add_delivery", methods=["GET", "POST"])
@@ -339,21 +396,27 @@ def add_deliveries():
     return render_template("add_delivery.html", form=form)
 
 
-# TODO showing stock for their specific store
-# TODO show amount of stock
-@app.route("/stock")
+@app.route("/view_stock")
 def view_stock():
     db = get_db()
-    query = """
+    all_stock_query = """
             SELECT *
             FROM products;
             """
-    products = db.execute(query).fetchall()
+    all_products = db.execute(all_stock_query).fetchall()
+    products = []
+    if g.store:
+        store_specific_query = """
+                SELECT DISTINCT *
+                FROM products as p 
+                    JOIN products_in_stores as pis
+                        ON p.product_id = pis.product_id
+                WHERE pis.store_id = ?;
+                """
+        products = db.execute(store_specific_query, (g.store, )).fetchall()
+    
+    return render_template("products_page.html", products=products, all_products=all_products)
 
-    return render_template("products_page.html", products=products)
-
-
-# TODO route for "scanning" and "buying" stock
-# TODO route for notifications when stock is low
-# have it on the homepage
-# a quick welcome back, these products are low in stock, and then a button for which ones you'd like to order
+@app.route("/admin_links")
+def admin_links():
+    return render_template("admin_links.html")

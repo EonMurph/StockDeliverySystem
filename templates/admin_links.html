@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<a href="{{ url_for('raise_permissions') }}">Raise Permissions</a>
+<br />
+<a href="{{ url_for('add_store') }}">Add Store</a>
+<br />
+<a href="{{ url_for('add_product') }}">Add Product</a>
+<br />
+<a href="{{ url_for('add_deliveries') }}">Add Delivery Route</a>
+<br />
+{% endblock %}

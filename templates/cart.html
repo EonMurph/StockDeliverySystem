@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}" />
+{% endblock %}
+
+{% block main_content %}
+
+<h1>Your cart</h1>
+{% if cart %}
+<table>
+  {% for product_id in cart %}
+  <tr>
+    <td>Product Id: {{ cart[product_id] }}</td>
+    <td>Product Name: {{ names[product_id] }}</td>
+    <td><a href="{{ url_for('get_delivery', product_id=cart[product_id]) }} ">Order</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>Your cart is empty!</p>
+{% endif %}
+
+{% endblock %}

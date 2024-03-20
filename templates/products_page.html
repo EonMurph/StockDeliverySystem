@@ -2,10 +2,38 @@
 
 {% block main_content %}
 
+{% if g.store %}
+<h2>Store Products</h2>
 {% for product in products %}
 <div>
-  <h2>{{ product["product_name"] }}</h2>
+  <h3>{{ product["product_name"] }}</h3>
+  <p>Amount in stock: {{ product["product_amount"] }}</p>
+  {% if g.manager %}
+  {% if product["product_amount"] <= product["order_point"] %}
+  <p class="error">The product amount has dropped below the order point.</p>
+  <p>Would you like to
+    <a
+      href="{{ url_for('order_products', product_id=product['product_id']) }}">order
+      more?</a>
+  </p>
+  {% endif %}
+  {% endif %}
 </div>
 {% endfor %}
-  
+{% endif %}
+
+<h2>All Products</h2>
+{% for product in all_products %}
+<div>
+  <h3>{{ product["product_name"] }}</h2>
+  {% if g.manager %}
+  <p>Would you like to
+    <a
+      href="{{ url_for('order_products', product_id=product['product_id']) }}">order
+      more?</a>
+  </p>
+  {% endif %}
+</div>
+{% endfor %}
+
 {% endblock %}

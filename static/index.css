@@ -33,35 +33,7 @@ main:has(#register) {
   box-sizing: border-box;
   padding-top: 20vh;
 
-  /* || Links */
-  > div.button_div > button {
-    cursor: pointer;
-    background: #3f37c9;
-    padding: 10px;
-    color: white;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 10px;
-  }
-
-  > div.form_div {
-    position: relative;
-    display: grid;
-    > form {
-      margin-top: 10px;
-
-      &#login_form {
-        display: none;
-      }
-      &#login_form,
-      &#reg_form {
-        grid-column: 1;
-        grid-row: 1;
-      }
-
-      /* >label:not(label[type="submit"]) {
-        width: 20em;
-      } */
-    }
+  > form {
+    margin-top: 10px;
   }
 }
